@@ -1,0 +1,85 @@
+<div class="space-y-6">
+  <!-- Top Welcome & Stat Banner -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Products Stat -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Products</span>
+        <span class="text-lg">📦</span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-2">
+        <span class="text-3xl font-extrabold text-slate-900">
+          {{ products().length }}
+        </span>
+        <span class="text-xs text-slate-500 font-medium">in MongoDB</span>
+      </div>
+    </div>
+
+    <!-- Orders Stat -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Orders Placed</span>
+        <span class="text-lg">🛒</span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-2">
+        <span class="text-3xl font-extrabold text-indigo-600">
+          {{ orders().length }}
+        </span>
+        <span class="text-xs text-slate-500 font-medium">in MySQL (`orders`)</span>
+      </div>
+    </div>
+
+    <!-- Total Spent Stat -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Spent</span>
+        <span class="text-lg">💰</span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-2">
+        <span class="text-3xl font-extrabold text-emerald-600">
+          ₹{{ totalSpent() | number:'1.2-2' }}
+        </span>
+        <span class="text-xs text-slate-500 font-medium">user orders</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid: Products + Orders on left, Weather Widget on right -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Product Form (Add / Edit) -->
+      <app-product-form
+        [product]="editingProduct()"
+        (formSubmit)="handleProductSubmit($event)"
+        (formCancel)="editingProduct.set(null)"
+      ></app-product-form>
+
+      <!-- Error Alert if any -->
+      @if (productError()) {
+        <div class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl">
+          {{ productError() }}
+        </div>
+      }
+
+      <!-- Product List -->
+      <app-product-list
+        [products]="products()"
+        (edit)="editingProduct.set($event)"
+        (delete)="handleDeleteProduct($event)"
+        (order)="handlePlaceOrder($event)"
+      ></app-product-list>
+
+      <!-- Orders List -->
+      <app-order-list
+        [orders]="orders()"
+        [products]="products()"
+        (cancelOrder)="handleCancelOrder($event)"
+      ></app-order-list>
+    </div>
+
+    <!-- Weather Widget Side Column -->
+    <aside class="lg:col-span-1 space-y-6">
+      <app-weather-card></app-weather-card>
+    </aside>
+  </div>
+</div>

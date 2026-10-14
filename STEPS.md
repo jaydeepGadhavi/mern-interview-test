@@ -152,14 +152,22 @@ Build in this order:
 **Where is state?** Server data (products, weather) and auth live in Redux. Form inputs are local `useState` because nothing else needs them.
 **Token in localStorage:** simple, but readable by JavaScript, so an XSS bug could steal it. A more secure production setup uses an httpOnly cookie.
 
-**If the interviewer asks about Angular instead:** the same structure applies. A `ProductService` using `HttpClient` replaces the thunks and the slice (components subscribe to an Observable or a signal), an `HttpInterceptor` adds the JWT, and a route guard replaces `ProtectedRoute`.
+**Frontend Architecture for both React and Angular:**
+- **React Frontend (`frontend/react`)**: Uses Redux Toolkit slices (`productSlice`, `authSlice`, `orderSlice`, `weatherSlice`), Axios with request interceptor, React Router, and Tailwind CSS.
+- **Angular Frontend (`frontend/angular`)**:
+  - `ApiService`: Generic HTTP service with `getHeader()` method that injects `Content-Type: application/json` and `Authorization: Bearer <token>` on all requests. Calls can be made as `this.apiService.post(url, data)`, `get(url, params)`, `put(url, data)`, `delete(url)`.
+  - **State Management with Services**: As required in the test rubric ("Proper use of state management: Services for Angular"), `ProductService`, `OrderService`, `AuthService`, and `WeatherService` use RxJS `BehaviorSubject` to hold state, exposing reactive `Observable` streams (`products$`, `orders$`, `currentUser$`, `weather$`, `loading$`, `error$`).
+  - **Route Guard**: Functional `authGuard` using `CanActivateFn` checking `authService.isAuthenticated`.
+  - **Tailwind CSS**: Modern styled components with exact UX parity with the React application.
 
 ---
 
 ## Step 7: Tests (25 min)
 
 - Backend (Jest): tests for the auth, product, order and weather **services**, with repositories mocked. Run `npm test` in `backend`.
-- Frontend (Vitest): reducer tests for `productSlice`. Run `npm test` in `frontend`.
+- Frontend (Vitest):
+  - React: Run `npm test` in `frontend/react` (tests `productSlice`).
+  - Angular: Run `npm test` in `frontend/angular` (tests `ApiService`, `ProductService`, and `App`).
 
 **Why test services?** That is where the business rules are (hashing, total calculation, ownership, error mapping). Mocked repositories make tests fast and need no database.
 

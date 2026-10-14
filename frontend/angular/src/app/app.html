@@ -1,0 +1,11 @@
+<div class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
+  <app-navbar></app-navbar>
+
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+    <router-outlet></router-outlet>
+  </main>
+
+  <ngx-spinner bdColor="rgba(15, 23, 42, 0.45)" size="medium" color="#4f46e5" type="ball-spin-clockwise" [fullScreen]="true">
+    <p style="color: white; font-weight: 600; margin-top: 12px; font-size: 14px;">Loading...</p>
+  </ngx-spinner>
+</div>

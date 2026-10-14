@@ -6,10 +6,11 @@ node_modules/
 .env.*
 !.env.example
 
-# Build output
+# Build output & cache
 dist/
 build/
 coverage/
+.angular/
 
 # Logs and OS files
 *.log

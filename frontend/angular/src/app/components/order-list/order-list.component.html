@@ -1,0 +1,162 @@
+@if (orders.length === 0) {
+  <div class="bg-white border border-dashed border-slate-200 rounded-2xl p-6 text-center text-slate-400">
+    <p class="text-sm font-medium">No orders placed yet.</p>
+    <p class="text-xs text-slate-400 mt-0.5">
+      Click the <span class="font-semibold text-emerald-600">"Order Now"</span> button on any product to create an order in MySQL.
+    </p>
+  </div>
+} @else {
+  <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+    <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🛒</span>
+        <h3 class="font-bold text-slate-900 text-base">Your Orders</h3>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+          {{ orders.length }}
+        </span>
+      </div>
+      <span class="text-xs text-slate-400 font-mono">Stored in MySQL (`orders` table)</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead>
+          <tr class="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px]">
+            <th class="py-2.5 px-3 font-bold">Order ID</th>
+            <th class="py-2.5 px-3 font-bold">User ID</th>
+            <th class="py-2.5 px-3 font-bold">Ordered Products</th>
+            <th class="py-2.5 px-3 font-bold">Total Amount</th>
+            <th class="py-2.5 px-3 font-bold">Date</th>
+            <th class="py-2.5 px-3 font-bold text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (order of orders; track order.orderId) {
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="py-3 px-3 font-bold text-slate-900 whitespace-nowrap">
+                #{{ order.orderId }}
+              </td>
+              <td class="py-3 px-3 text-slate-600 font-mono whitespace-nowrap">
+                {{ order.userId }}
+              </td>
+              <td class="py-3 px-3">
+                <div class="flex flex-wrap gap-1.5 py-0.5">
+                  @for (item of getOrderItems(order); track $index) {
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/80 border border-indigo-100/90 text-[11px] font-medium text-slate-800">
+                      <span class="font-semibold text-slate-900">{{ item.name }}</span>
+                      @if (item.price !== null) {
+                        <span class="text-emerald-700 font-bold">
+                          ₹{{ item.price | number:'1.2-2' }}
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+              </td>
+              <td class="py-3 px-3 font-bold text-emerald-600 text-sm whitespace-nowrap">
+                ₹{{ order.totalAmount | number:'1.2-2' }}
+              </td>
+              <td class="py-3 px-3 text-slate-400 text-[11px] whitespace-nowrap">
+                {{ order.createdAt ? (order.createdAt | date:'shortDate') : 'Today' }}
+              </td>
+              <td class="py-3 px-3 text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  (click)="promptCancel(order)"
+                  class="px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (orderToCancel(); as target) {
+    <!-- Professional Confirmation Modal -->
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+      (click)="closeCancelModal()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cancel-modal-title"
+    >
+      <div
+        class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 overflow-hidden"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Top accent decoration -->
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-rose-400 to-amber-500"></div>
+
+        <!-- Close button -->
+        <button
+          type="button"
+          (click)="closeCancelModal()"
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-sm cursor-pointer transition-colors"
+          aria-label="Close modal"
+        >
+          ✕
+        </button>
+
+        <!-- Header -->
+        <div class="flex items-start gap-3.5 mb-4 mt-1">
+          <div class="w-11 h-11 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">
+            ⚠️
+          </div>
+          <div>
+            <h3 id="cancel-modal-title" class="text-base font-bold text-slate-900">
+              Cancel Order #{{ target.orderId }}
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Are you sure you want to cancel this order? This action will permanently remove it from the database.
+            </p>
+          </div>
+        </div>
+
+        <!-- Summary box -->
+        <div class="my-4 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-1.5">
+          <div class="flex justify-between items-center text-slate-600">
+            <span class="text-slate-500">Order ID:</span>
+            <span class="font-mono font-bold text-slate-900">#{{ target.orderId }}</span>
+          </div>
+          <div class="flex justify-between items-center text-slate-600">
+            <span class="text-slate-500">Total Amount:</span>
+            <span class="font-bold text-emerald-600 text-sm">₹{{ target.totalAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between items-center text-slate-600">
+            <span class="text-slate-500">User ID:</span>
+            <span class="font-mono text-slate-700">{{ target.userId }}</span>
+          </div>
+          @if (target.createdAt) {
+            <div class="flex justify-between items-center text-slate-600">
+              <span class="text-slate-500">Placed On:</span>
+              <span class="text-slate-700">{{ target.createdAt | date:'mediumDate' }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button
+            type="button"
+            (click)="closeCancelModal()"
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+          >
+            Keep Order
+          </button>
+          <button
+            type="button"
+            (click)="confirmCancel()"
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 shadow-md shadow-rose-200 hover:shadow-rose-300 transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <span>🗑️</span>
+            <span>Confirm Cancellation</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+}

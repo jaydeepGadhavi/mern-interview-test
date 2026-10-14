@@ -1,16 +1,17 @@
-# MERN Product Manager
+# MERN / MEAN Product Manager
 
-A full-stack coding-test project: React + Redux Toolkit frontend, Express backend, MongoDB for products, MySQL for users and orders, and a third-party weather API on the dashboard.
+A full-stack coding-test project supporting both **React (Redux Toolkit)** and **Angular (RxJS Services)** frontends, an Express backend, MongoDB for products, MySQL for users and orders, and a third-party weather API on the dashboard.
 
 ## Tech stack
 
 | Layer | Technology |
 | --- | --- |
-| Frontend | React 18, Redux Toolkit, React Router, Axios, Vite |
+| Frontend (React) | React 18, Redux Toolkit, React Router, Axios, Tailwind CSS, Vite |
+| Frontend (Angular) | Angular 22, RxJS Service State Management, ApiService (`getHeader()`), Tailwind CSS |
 | Backend | Node.js, Express 4, Joi (validation), JWT, bcrypt |
 | Databases | MongoDB (Mongoose) for **products**, MySQL (mysql2) for **users** and **orders** |
 | Third-party API | [Open-Meteo](https://open-meteo.com/) (weather, no API key required) |
-| Tests | Jest (backend), Vitest (frontend) |
+| Tests | Jest (backend), Vitest (frontend React & Angular) |
 
 ## Project structure
 
@@ -36,17 +37,25 @@ fullstack-test/
 │   │   └── utils/                # ApiError, asyncHandler
 │   └── tests/                    # Jest unit tests for services
 └── frontend/
-    ├── package.json
-    ├── vite.config.js            # dev proxy: /api -> http://localhost:5000
-    └── src/
-        ├── app/store.js          # Redux store
-        ├── api/http.js           # axios instance + JWT interceptor
-        ├── features/
-        │   ├── auth/             # authSlice, AuthPage (login/register)
-        │   ├── products/         # productSlice, ProductForm, ProductList
-        │   └── weather/          # weatherSlice, WeatherCard
-        ├── components/           # Navbar, ProtectedRoute
-        └── pages/Dashboard.jsx
+    ├── react/                    # React 18 frontend (Redux Toolkit + Tailwind)
+    │   ├── package.json
+    │   ├── vite.config.js        # dev proxy: /api -> http://localhost:5000
+    │   └── src/
+    │       ├── app/store.js      # Redux store
+    │       ├── api/http.js       # axios instance + JWT interceptor
+    │       ├── features/         # auth, products, orders, weather
+    │       ├── components/       # Navbar, ProtectedRoute
+    │       └── pages/Dashboard.jsx
+    └── angular/                  # Angular 22 frontend (RxJS Services + Tailwind)
+        ├── package.json
+        ├── angular.json          # serve proxy: /api -> http://localhost:5000
+        ├── proxy.conf.json
+        └── src/app/
+            ├── models/           # product, order, user, weather, api-response
+            ├── services/         # ApiService (getHeader), AuthService, ProductService, OrderService, WeatherService
+            ├── guards/           # authGuard (CanActivateFn)
+            ├── components/       # navbar, product-form, product-list, order-list, weather-card, toast
+            └── pages/            # auth (login/register), dashboard
 ```
 
 Backend request flow: **route → controller → service → repository → database**.
@@ -72,13 +81,23 @@ On startup the server creates the MySQL database and the `users` and `orders` ta
 
 ### 2. Frontend
 
+You can run either the React frontend or the Angular frontend:
+
+#### Option A: React Frontend (MERN)
 ```bash
-cd frontend
+cd frontend/react
 npm install
 npm run dev               # http://localhost:5173
 ```
 
-Open http://localhost:5173, register an account, then manage products on the dashboard.
+#### Option B: Angular Frontend (MEAN)
+```bash
+cd frontend/angular
+npm install
+npm start                 # http://localhost:4200 (proxies /api to :5000)
+```
+
+Open http://localhost:5173 (React) or http://localhost:4200 (Angular), register an account, then manage products on the dashboard.
 
 ## Environment variables (`backend/.env`)
 
@@ -145,8 +164,9 @@ curl -X POST localhost:5000/api/orders -H "Authorization: Bearer $TOKEN" \
 ## Running tests
 
 ```bash
-cd backend && npm test      # services: auth, products, orders, weather
-cd frontend && npm test     # product Redux slice
+cd backend && npm test             # services: auth, products, orders, weather
+cd frontend/react && npm test      # React Redux product slice unit tests
+cd frontend/angular && npm test    # Angular ApiService & ProductService unit tests
 ```
 
 Backend tests mock the repositories (and `fetch` for weather), so they need no running database or internet.

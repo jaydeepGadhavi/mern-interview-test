@@ -1,0 +1,72 @@
+<div class="max-w-md mx-auto my-12">
+  <div class="bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-200/40 p-8">
+    <div class="text-center mb-6">
+      <div
+        class="inline-flex w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 items-center justify-center font-bold text-xl mb-3 shadow-sm">
+        {{ isLogin() ? '🔑' : '✨' }}
+      </div>
+      <h2 class="text-2xl font-bold text-slate-900">
+        {{ isLogin() ? 'Sign in to your account' : 'Create your account' }}
+      </h2>
+      <p class="text-sm text-slate-500 mt-1">
+        {{ isLogin() ? 'Enter your credentials to manage products' : 'Get started by creating a new account' }}
+      </p>
+    </div>
+
+    @if (errorMessage()) {
+    <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl flex items-start gap-2.5">
+      <span class="text-rose-500 mt-0.5 font-bold">⚠️</span>
+      <div class="flex-1 font-medium">{{ errorMessage() }}</div>
+    </div>
+    }
+
+    <form (submit)="$event.preventDefault(); onSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">
+          Username
+        </label>
+        <input type="text" name="username" [value]="username()" (input)="username.set($any($event.target).value)"
+          required minlength="3" [placeholder]="isLogin() ? 'Enter your username' : 'e.g. user123 or user@domain.com'"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 transition-all text-sm placeholder:text-slate-400" />
+        @if (!isLogin()) {
+        <p class="text-xs text-slate-500 mt-1">
+          3–50 characters (letters, numbers, &#64;, _, -, .)
+        </p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">
+          Password
+        </label>
+        <input type="password" name="password" [value]="password()" (input)="password.set($any($event.target).value)"
+          required [attr.minlength]="isLogin() ? 1 : 8" [placeholder]="isLogin() ? 'Enter your password' : 'e.g. User@1234'"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 transition-all text-sm placeholder:text-slate-400" />
+        @if (!isLogin()) {
+        <p class="text-xs text-slate-500 mt-1">
+          At least 8 chars with 1 uppercase, 1 lowercase, 1 number, and 1 special character.
+        </p>
+        }
+      </div>
+
+      <button type="submit" [disabled]="!username().trim() || !password()"
+        class="w-full mt-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-sm shadow-md shadow-indigo-200 hover:shadow-indigo-300 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">
+        {{ isLogin() ? 'Sign In' : 'Create Account' }}
+      </button>
+    </form>
+
+    <div class="mt-6 pt-5 border-t border-slate-100 text-center text-sm text-slate-500">
+      @if (isLogin()) {
+      Don't have an account?
+      <a routerLink="/register" class="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
+        Create one now
+      </a>
+      } @else {
+      Already have an account?
+      <a routerLink="/login" class="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
+        Sign in
+      </a>
+      }
+    </div>
+  </div>
+</div>
